@@ -1,0 +1,99 @@
+import sys # print("Debug messages...", file=sys.stderr)
+import math
+
+def go():
+    print_moves.append(directions[index_dir])
+    bender_l = check_l
+    bender_c = check_c
+    return bender_l, bender_c
+    
+l, c = [int(i) for i in input().split()]
+
+grid = [[str(e) for e in input()] for i in range(l)]
+#print("grid", grid, file=sys.stderr)
+
+directions = ["SOUTH", "EAST", "NORTH", "WEST"]
+moves = {"SOUTH": (1,0), "EAST": (0,1), "NORTH": (-1,0), "WEST": (0,-1)}
+
+bender_l = 0
+bender_c = 0
+index_dir = 0
+count_loops = 0
+obstacle = False
+breaker = False
+teleporter = []
+print_moves = []
+
+for i in range(l):
+    for j in range(c):
+        if grid[i][j] == "@":
+            bender_l = i
+            bender_c = j
+        if grid[i][j] == "T":
+            teleporter.append((i,j))
+
+while True:
+    count_loops += 1
+    next_l, next_c = moves[directions[index_dir]]
+    check_l = bender_l + next_l
+    check_c = bender_c + next_c
+    state = grid[check_l][check_c]
+
+    if state == " ":
+        obstacle = False
+        bender_l, bender_c = go()
+    elif state == "#": 
+        if obstacle:
+            index_dir += 1
+        else:
+            index_dir = 0
+            obstacle = True
+    elif state == "X": 
+        if breaker:
+            bender_l, bender_c = go()
+            grid[bender_l][bender_c] = " "
+        else:
+            if obstacle:
+                index_dir += 1
+            else:
+                index_dir = 0
+                obstacle = True
+    elif state == "@": 
+        bender_l, bender_c = go()
+    elif state == "$":
+        print_moves.append(directions[index_dir])
+        break
+    elif state == "S":
+        bender_l, bender_c = go()
+        index_dir = 0
+    elif state == "E": 
+        bender_l, bender_c = go()
+        index_dir = 1
+    elif state == "N": 
+        bender_l, bender_c = go()
+        index_dir = 2
+    elif state == "W": 
+        bender_l, bender_c = go()
+        index_dir = 3
+    elif state == "B": 
+        breaker = not breaker
+        bender_l, bender_c = go()
+    elif state == "I": 
+        bender_l, bender_c = go()
+        directions = directions[::-1] 
+        index_dir = 3 - index_dir
+    elif state == "T": 
+        bender_l, bender_c = go()
+        if (bender_l, bender_c) == teleporter[0]:
+            bender_l = teleporter[1][0]
+            bender_c = teleporter[1][1]
+        else:
+            bender_l = teleporter[0][0]
+            bender_c = teleporter[0][1]
+     
+    if count_loops == 200:
+        print_moves.clear()
+        print_moves.append("LOOP")
+        break
+
+[print(element) for element in print_moves]
